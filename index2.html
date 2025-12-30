@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>maru's salon | 奈良県橿原市 完全貸切プライベートサロン</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="icon" href="logo.png" type="image/png">
+
+
+<style>
+/* 1. 全ての要素を強制的に「透かし」にする（犯人を逃さない） */
+html, body {
+    background: #fdfbfb !important; /* ベースの色 */
+}
+section, .hero, .intro, .philosophy, .menu, .voice, .access, .container {
+    background-color: transparent !important;
+}
+
+/* 2. 背景コンテナを「最強の前面」に持ってくる（一旦見えるか確認するため） */
+#bg-circles {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 0 !important; /* 一番前に持ってきたぞ！ */
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.floating-circle {
+    position: absolute;
+    border-radius: 50%;
+    /* 視認性向上のために最初はあえて枠線をつける */
+    border: 2px solid rgba(0,0,0,0.1); 
+    filter: blur(20px); 
+    will-change: transform, opacity;
+}
+
+@keyframes float-and-fade {
+    0% { opacity: 0; transform: translate(0, 0) scale(1); }
+    20% { opacity: 0.8; } 
+    80% { opacity: 0.8; }
+    100% { opacity: 0; transform: translate(var(--mx), var(--my)) scale(2); }
+}
+</style>
+
+<div id="bg-circles"></div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('bg-circles');
+    const colors = ['#FFD1DC', '#D1E8FF', '#E2F0CB', '#F0E2FF', '#FFF9C4'];
+    let circles = [];
+    const circleCount = 12;
+
+    const friction = 0.98; 
+    const ease = 0.001; 
+    let targetX = null;
+    let targetY = null;
+    let isPressing = false;
+
+    // --- サークル生成の型紙 ---
+    const createCircle = () => {
+        const div = document.createElement('div');
+        div.className = 'floating-circle';
+        const size = (Math.random() * 7 + 3) * (window.innerWidth / 100);
+        
+        div.style.width = div.style.height = `${size}px`;
+        div.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        div.style.opacity = "0";
+        container.appendChild(div);
+
+        return {
+            el: div,
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: (Math.random() - 0.5) * 1.5,
+            life: 1.0,
+            ageRate: 0.0005 + Math.random() * 0.003 
+        };
+    };
+
+    // 初回12個
+    for (let i = 0; i < circleCount; i++) circles.push(createCircle());
+
+    const update = () => {
+        const nextCircles = []; // 新しい世代を格納する箱
+
+        circles.forEach(c => {
+            c.life -= c.ageRate;
+
+            if (c.life <= 0) {
+                // 寿命が尽きたらDOMを消して、新しいサークルを1つ予約
+                c.el.remove();
+                nextCircles.push(createCircle());
+            } else {
+                // 生存中なら物理計算
+                if (isPressing && targetX !== null && targetY !== null) {
+                    c.vx += (targetX - c.x) * ease;
+                    c.vy += (targetY - c.y) * ease;
+                } else {
+                    c.vx += (Math.random() - 0.5) * 0.1;
+                    c.vy += (Math.random() - 0.5) * 0.1;
+                }
+
+                c.vx *= friction;
+                c.vy *= friction;
+                c.x += c.vx;
+                c.y += c.vy;
+
+                // 端の跳ね返り
+                if (c.x < 0 || c.x > window.innerWidth) c.vx *= -1;
+                if (c.y < 0 || c.y > window.innerHeight) c.vy *= -1;
+
+                // 透明度計算（0.4をピークに山形）
+                let op = 0.4;
+                if (c.life > 0.8) op = (1.0 - c.life) * 2;
+                else if (c.life < 0.2) op = c.life * 2;
+
+                
+
+
+
+
+                c.el.style.transform = `translate(${c.x}px, ${c.y}px)`;
+                c.el.style.opacity = Math.max(0, Math.min(0.4, op));
+
+                // update関数の中、スタイルの反映直前にこれを入れるだけ！
+
+                // 1. サイズの呼吸：lifeに合わせて大きさが微妙に変化する
+                const scale = 1 + Math.sin(c.life * Math.PI * 2) * 0.2; 
+
+                // 2. スタイル反映（transformにscaleを追加）
+                c.el.style.transform = `translate(${c.x}px, ${c.y}px) scale(${scale})`;
+
+                // 3. 攻撃的な色変化：指に近いサークルだけ、ちょっとだけ明るくする（オプション）
+                if (isPressing && targetX !== null) {
+                    const dist = Math.hypot(targetX - c.x, targetY - c.y);
+                    if (dist < 100) {
+                        //c.el.style.filter = 'brightness(1.2) saturate(1.1)';
+                        c.el.style.filter = 'blur(20px)';
+                    } else {
+                        //c.el.style.filter = 'none';
+                        c.el.style.filter = 'blur(5px)';
+                    }
+                }
+                
+                nextCircles.push(c); // 生き残りを次の世代へ
+            }
+        });
+
+        circles = nextCircles; // 世代交代！
+        requestAnimationFrame(update);
+    };
+    update();
+
+    // --- タップイベント（ここは鉄板） ---
+// --- スマホでもスクロールできる＆吸い寄せられるイベント設定 ---
+
+    const updatePos = (e) => {
+        // タッチでもマウスでも座標を取れるように共通化
+        const ev = (e.touches && e.touches[0]) || e;
+        targetX = ev.clientX;
+        targetY = ev.clientY;
+    };
+
+    // 1. マウス（PC）
+    window.addEventListener('mousedown', (e) => { 
+        isPressing = true; 
+        updatePos(e); 
+    });
+    window.addEventListener('mousemove', (e) => { 
+        if(isPressing) updatePos(e); 
+    });
+    window.addEventListener('mouseup', () => { 
+        isPressing = false; 
+    });
+
+    // 2. タッチ（スマホ）★ここが重要！
+    // passive: true に戻すことで、ブラウザのスクロールを優先させる
+    window.addEventListener('touchstart', (e) => { 
+        isPressing = true; 
+        updatePos(e); 
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => { 
+        if(isPressing) {
+            updatePos(e);
+            // preventDefault は絶対にしない！
+            // これで、サークルを呼び寄せながら画面もスルスル動くようになる
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => { 
+        isPressing = false; 
+    });
+});
+</script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Helvetica Neue',Arial,'Hiragino Sans',sans-serif;line-height:1.8;color:#333;background:#fff;overflow-x:hidden}
+.container{max-width:1200px;margin:0 auto;padding:0 20px}
+header{background:rgba(255,255,255,0.98);position:fixed;width:100%;top:0;z-index:1000;box-shadow:0 2px 10px rgba(0,0,0,0.1);animation:slideDown 0.6s}
+@keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.header-content{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;max-width:1200px;margin:0 auto}
+.logo{font-size:24px;font-weight:bold;color:#2c3e50;animation:fadeIn 0.8s 0.3s both}
+@keyframes fadeIn{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
+nav a{margin-left:30px;text-decoration:none;color:#555;font-size:14px;transition:color 0.3s;position:relative;animation:fadeInUp 0.6s both}
+nav a:nth-child(1){animation-delay:0.4s}
+nav a:nth-child(2){animation-delay:0.5s}
+nav a:nth-child(3){animation-delay:0.6s}
+nav a:nth-child(4){animation-delay:0.7s}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+nav a:hover{color:#d4a574}
+nav a::after{content:'';position:absolute;bottom:-5px;left:0;width:0;height:2px;background:#d4a574;transition:width 0.3s}
+nav a:hover::after{width:100%}
+.hero{height:100vh;min-height:700px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(135deg,#f5f5f5 0%,#e8e8e8 100%);margin-top:60px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:url('interior.jpg') center/cover;animation:zoomIn 20s ease-out infinite alternate;opacity:0.3}
+@keyframes zoomIn{from{transform:scale(1)}to{transform:scale(1.1)}}
+.hero>*{position:relative;z-index:1}
+.hero h1{font-size:56px;font-weight:300;margin-bottom:20px;margin-top:0px;color:#2c3e50;letter-spacing:2px;animation:fadeInUp 1s 0.5s both}
+.hero .subtitle{font-size:18px;color:#444;margin-bottom:20px;letter-spacing:4px;animation:fadeInUp 1s 0.8s both}
+.rating{margin:10px 0;font-size:16px;animation:fadeInUp 1s 1.1s both}
+.stars{color:#d4a574;font-size:24px;margin-bottom:5px}
+.stars span{display:inline-block;animation:starPop 0.5s both}
+.stars span:nth-child(1){animation-delay:1.3s}
+.stars span:nth-child(2){animation-delay:1.5s}
+.stars span:nth-child(3){animation-delay:1.7s}
+.stars span:nth-child(4){animation-delay:1.9s}
+.stars span:nth-child(5){animation-delay:2.3s}
+@keyframes starPop{0%{opacity:0;transform:scale(0) rotate(-540deg)}50%{transform:scale(1.2) rotate(10deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+.cta-button{display:inline-block;padding:15px 40px;background:#d4a574;color:white;text-decoration:none;border-radius:30px;font-size:16px;transition:all 0.3s;margin-top:20px;animation:fadeInUp 1s 1.9s both;position:relative;overflow:hidden}
+.cta-button::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,0.3);transform:translate(-50%,-50%);transition:width 0.6s,height 0.6s}
+.cta-button:hover::before{width:300px;height:300px}
+.cta-button:hover{background:#c19563;transform:translateY(-2px);box-shadow:0 5px 15px rgba(212,165,116,0.3)}
+.scroll-indicator{position:absolute;bottom:0px;left:50%;transform:translateX(-50%);text-align:center;animation:bounce 2s infinite 2.5s}
+@keyframes bounce{0%,20%,50%,80%,100%{transform:translateX(-50%) translateY(0)}40%{transform:translateX(-50%) translateY(-10px)}60%{transform:translateX(-50%) translateY(-5px)}}
+.scroll-indicator a{color:#444;text-decoration:none;font-size:15px;}
+.fade-in-section{opacity:0;transform:translateY(50px);transition:opacity 0.8s,transform 0.8s}
+.fade-in-section.is-visible{opacity:1;transform:translateY(0)}
+section{padding:100px 20px}
+.section-title{font-size:36px;text-align:center;margin-bottom:60px;color:#2c3e50;font-weight:300;position:relative;padding-bottom:20px}
+.section-title:after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:3px;background:#d4a574;transition:width 0.8s 0.3s}
+.fade-in-section.is-visible .section-title:after{width:60px}
+.intro{background:#fff;text-align:center}
+.intro p{max-width:800px;margin:0 auto 30px;font-size:16px;line-height:2;color:#555}
+.philosophy{background:#f9f9f9;position:relative;overflow:hidden}
+.philosophy::before{content:'';position:absolute;top:-50%;right:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(212,165,116,0.1) 0%,transparent 70%);animation:float 20s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(-50px,50px) rotate(180deg)}}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:40px;max-width:1000px;margin:0 auto}
+.feature-card{text-align:center;padding:40px 20px;background:white;border-radius:10px;transition:all 0.3s;opacity:0;transform:translateY(30px) scale(0.9)}
+.is-visible .feature-card{animation:cardIn 0.6s forwards}
+.is-visible .feature-card:nth-child(1){animation-delay:0.1s}
+.is-visible .feature-card:nth-child(2){animation-delay:0.2s}
+.is-visible .feature-card:nth-child(3){animation-delay:0.3s}
+.is-visible .feature-card:nth-child(4){animation-delay:0.4s}
+@keyframes cardIn{to{opacity:1;transform:translateY(0) scale(1)}}
+.feature-card:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 10px 30px rgba(0,0,0,0.1)}
+.feature-icon{font-size:48px;margin-bottom:20px;display:inline-block}
+.feature-card:hover .feature-icon{animation:iconBounce 1.2s}
+@keyframes iconBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.feature-card h3{font-size:20px;margin-bottom:15px;color:#2c3e50;font-weight:500}
+.feature-card p{font-size:14px;color:#666;line-height:1.8}
+.menu{background:#fff;background-size:cover;background-position:center;background-attachment:fixed;position:relative}
+.menu::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.95)}
+.menu .container{position:relative;z-index:1}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:30px;max-width:1000px;margin:0 auto}
+.menu-item{padding:30px;background:#f9f9f9;border-radius:10px;border-left:4px solid #d4a574;transition:all 0.3s;opacity:0;transform:translateX(-30px)}
+.is-visible .menu-item{animation:slideLeft 0.6s forwards}
+.is-visible .menu-item:nth-child(1){animation-delay:0.1s}
+.is-visible .menu-item:nth-child(2){animation-delay:0.2s}
+.is-visible .menu-item:nth-child(3){animation-delay:0.3s}
+.is-visible .menu-item:nth-child(4){animation-delay:0.4s}
+.is-visible .menu-item:nth-child(5){animation-delay:0.5s}
+.is-visible .menu-item:nth-child(6){animation-delay:0.6s}
+@keyframes slideLeft{to{opacity:1;transform:translateX(0)}}
+.menu-item:hover{background:#fff;box-shadow:0 5px 20px rgba(0,0,0,0.1);transform:translateX(5px)}
+.menu-item h3{font-size:20px;margin-bottom:10px;color:#2c3e50}
+.menu-item p{font-size:14px;color:#666;margin-bottom:15px}
+.menu-price{font-size:24px;color:#d4a574;font-weight:bold}
+.voice{background:#f9f9f9}
+.testimonials{max-width:900px;margin:0 auto}
+.testimonial{background:white;padding:40px;margin-bottom:30px;border-radius:10px;box-shadow:0 5px 15px rgba(0,0,0,0.05);opacity:0;transform:scale(0.95)}
+.is-visible .testimonial{animation:pop 0.6s forwards}
+.is-visible .testimonial:nth-child(1){animation-delay:0.2s}
+.is-visible .testimonial:nth-child(2){animation-delay:0.4s}
+@keyframes pop{to{opacity:1;transform:scale(1)}}
+.testimonial-text{font-size:15px;line-height:1.9;color:#555;margin-bottom:20px;font-style:italic}
+.testimonial-author{text-align:right;font-size:14px;color:#999}
+.owner-message{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);color:white;text-align:center;padding:80px 20px;position:relative;overflow:hidden}
+.owner-message::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,0.05) 1px,transparent 1px);background-size:50px 50px;animation:moveBg 20s linear infinite}
+@keyframes moveBg{0%{transform:translate(0,0)}100%{transform:translate(50px,50px)}}
+.owner-message .container{position:relative;z-index:1}
+.owner-message p{max-width:700px;margin:0 auto 20px;font-size:16px;line-height:2}
+.owner-name{margin-top:40px;font-size:14px;opacity:0.9}
+.access{background:#fff}
+.access-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:40px;max-width:1000px;margin:0 auto}
+.access-item{text-align:center;opacity:0;transform:translateY(20px)}
+.is-visible .access-item{animation:fadeInUp 0.6s forwards}
+.is-visible .access-item:nth-child(1){animation-delay:0.1s}
+.is-visible .access-item:nth-child(2){animation-delay:0.2s}
+.is-visible .access-item:nth-child(3){animation-delay:0.3s}
+.is-visible .access-item:nth-child(4){animation-delay:0.4s}
+.is-visible .access-item:nth-child(5){animation-delay:0.5s}
+.is-visible .access-item:nth-child(6){animation-delay:0.6s}
+.access-item h3{font-size:18px;margin-bottom:15px;color:#2c3e50;font-weight:500}
+.access-item p{font-size:14px;color:#666;line-height:1.8}
+footer{background:#2c3e50;color:white;padding:60px 20px 30px;text-align:center}
+.footer-content{max-width:1200px;margin:0 auto}
+.footer-links{margin:30px 0}
+.footer-links a{color:white;text-decoration:none;margin:0 15px;font-size:14px;transition:all 0.3s;display:inline-block}
+.footer-links a:hover{color:#d4a574;transform:translateY(-3px)}
+.footer-bottom{margin-top:40px;padding-top:30px;border-top:1px solid rgba(255,255,255,0.1);font-size:13px;opacity:0.7}
+iframe {
+animation:fadeInUp 1s 0.8s both
+}
+
+@media(max-width:768px){
+    .hero h1{font-size:36px}.hero .subtitle{font-size:14px}.section-title{font-size:28px}nav{display:none}.features-grid,.menu-grid,.access-grid{grid-template-columns:1fr}
+}
+
+</style>
+</head>
+<body>
+<header>
+<div class="header-content">
+<div class="logo">maru's salon</div>
+<nav>
+<a href="#philosophy">Philosophy</a>
+<a href="#menu">Menu</a>
+<a href="#voice">Voice</a>
+<a href="#access">Access</a>
+</nav>
+</div>
+</header>
+<div id="sample-watermark">SAMPLE</div>
+
+<style>
+  #sample-watermark {
+    /* 画面に固定 */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-20deg); /* 真ん中に置いて20度傾ける */
+    
+    /* 見た目：巨大で薄い文字 */
+    font-size: 6vw; /* 画面幅に合わせてサイズが変わる */
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.05); /* めっちゃ薄い黒（背景に合わせて調整） */
+    
+    /* 演出：枠線をつけると「判子」っぽくなる */
+    border: 15px solid rgba(0, 0, 0, 0.05);
+    padding: 2px 100px;
+    white-space: nowrap; /* 改行させない */
+    
+    /* 最重要：これがないと下のボタンが押せなくなる */
+    pointer-events: none; 
+    
+    /* 常に一番上に表示 */
+    z-index: 9999;
+    
+    /* ユーザーがコピペできないように */
+    user-select: none;
+    
+    /* 縁取り（背景が暗い場合に見えやすくする） */
+    text-shadow: 2px 2px 0 rgba(255,255,255,0.05);
+  }
+</style>
+
+<section class="hero">
+<h1>maru's salon</h1>
+<div>
+<img src="logo.png" style="width:240px; height: auto; margin-bottom: 24px; border-radius:50%; border: 3px solid #d4a574; animation:fadeInUp 2.6s forwards;">
+<div class="scroll-indicator"><a href="#start">特長を見る↓</a></div>
+</div>
+<div class="subtitle">– 頑張るあなたのための、特別な時間 –</div>
+<div class="rating">
+<div class="stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+<div>4.93 / 161 Reviews</div>
+</div>
+<div style="text-align:center;margin-top:30px">
+<a href="https://beauty.hotpepper.jp/slnH000722331/" class="cta-button" target="_blank">今すぐ予約</a>
+</div>
+</section>
+<section id="start" class="intro fade-in-section">
+<div class="container">
+<h2 class="section-title">あなたの髪と心を、美しく。</h2>
+<p>家事に、育児に、お仕事に。毎日頑張りすぎていませんか？</p>
+<p>マルズサロンは、そんな頑張るあなたのための隠れ家のような美容室です。</p>
+<p>完全貸切空間で、周りを気にせずゆったりとした時間をお過ごしください。</p>
+<p>髪と心、両方を癒すサロンであなたをお待ちしています。</p>
+</div>
+</section>
+<section id="philosophy" class="philosophy fade-in-section">
+<div class="container">
+<h2 class="section-title">Our Philosophy</h2>
+<div class="features-grid">
+<div class="feature-card">
+<div class="feature-icon"><img src="interior.jpg" style="width:90%;"></div>
+<h3>完全貸切空間</h3>
+<p>プライベートな空間で、周りを気にせずゆったりとお過ごしいただけます</p>
+</div>
+<div class="feature-card">
+<div class="feature-icon"><img src="logo.png" style="width:90%;"></div>
+<h3>キッズスペース完備</h3>
+<p>2児の母であるオーナーが運営。お子様連れでも安心してご来店いただけます</p>
+</div>
+<div class="feature-card">
+<div class="feature-icon">🌿</div>
+<h3>オーガニック志向</h3>
+<p>地肌に優しいオーガニックカラー、ヘナなど厳選した薬剤を使用</p>
+</div>
+<div class="feature-card">
+<div class="feature-icon"><img src="logo.png" style="width:90%;"></div>
+<h3>髪質改善のプロ</h3>
+<p>アジュバン正規取扱店。独自のメソッドで理想の艶髪を実現</p>
+</div>
+</div>
+</div>
+</section>
+<section id="menu" class="menu fade-in-section">
+<div class="container">
+<h2 class="section-title">Menu</h2>
+<p style="text-align:center;margin-bottom:60px;color:#666">厳選されたメニューで、あなたの美しさを引き出します</p>
+<div class="menu-grid">
+<div class="menu-item">
+<h3>似合わせカット + カラー</h3>
+<p>あなたにぴったりのスタイルをご提案</p>
+<div class="menu-price">¥8,000〜</div>
+</div>
+<div class="menu-item">
+<h3>カット + カラー + トリートメント</h3>
+<p>艶髪を実現する3STEPトリートメント</p>
+<div class="menu-price">¥10,100〜</div>
+</div>
+<div class="menu-item">
+<h3>髪質改善ストレート</h3>
+<p>ダメージや癖毛でお悩みの方に</p>
+<div class="menu-price">¥14,300</div>
+</div>
+<div class="menu-item">
+<h3>極上ヘッドスパ</h3>
+<p>頭皮ケアとマッサージで至福のひととき</p>
+<div class="menu-price">¥3,500〜</div>
+</div>
+<div class="menu-item">
+<h3>オーガニックカラー・ヘナ</h3>
+<p>カラー剤にお悩みの方へ</p>
+<div class="menu-price">¥7,000〜</div>
+</div>
+<div class="menu-item">
+<h3>フェイシャルエステ</h3>
+<p>アジュバン製品で美しい艶肌に</p>
+<div class="menu-price">お問い合わせ</div>
+</div>
+</div>
+</div>
+</section>
+<section id="voice" class="voice fade-in-section">
+<div class="container">
+<h2 class="section-title">Voice</h2>
+<p style="text-align:center;margin-bottom:60px;color:#666">お客様からいただいた声</p>
+<div class="testimonials">
+<div class="testimonial">
+<div class="testimonial-text">髪の毛が広がりやすく、縮毛矯正を勧められ続けていましたが、カットとクレンジングスパで髪が収まって驚きました。趣味や仕事の悩みなど色々お話でき、とても居心地良く過ごせました。</div>
+<div class="testimonial-author">— アユミン様（20代後半）</div>
+</div>
+<div class="testimonial">
+<div class="testimonial-text">完全貸切なので周りの目も気にならず、リラックスして施術を受けられます。2児の母であるオーナーさんに日頃の悩みを打ち明けつつ癒しも得られる最高のサロンです。</div>
+<div class="testimonial-author">— 常連のお客様</div>
+</div>
+</div>
+</div>
+</section>
+<div class="owner-message fade-in-section">
+<div class="container">
+<p>家事に、育児に、お仕事に。<br>毎日頑張りすぎていませんか？</p>
+<p>マルズサロンは、そんな頑張るあなたのための<br>隠れ家のような美容室です。</p>
+<p>完全貸切空間で、周りを気にせず<br>ゆったりとした時間をお過ごしください。</p>
+<p>髪と心、両方を癒すサロンで<br>あなたをお待ちしています。</p>
+<div class="owner-name">オーナースタイリスト　ナガモリマサヨ</div>
+</div>
+</div>
+<section id="access" class="access fade-in-section">
+<div class="container">
+<h2 class="section-title">Access</h2>
+<div id="map" align="center">
+<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3287.968305005119!2d135.78755707519716!3d34.503687793759305!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x600133a39ec9fa25%3A0x5e027f185a4196e9!2smaru&#39;s%20salon!5e0!3m2!1sja!2sjp!4v1766688339934!5m2!1sja!2sjp" width="600" height="450" style="border:0; margin-bottom:20px; max-width:98%;border-radius:3%;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+</div>
+<div class="access-grid">
+<div class="access-item">
+<h3>Address</h3>
+<p>奈良県橿原市四条町627-5<br>ぷれも薬局1Fカフェ内</p>
+</div>
+<div class="access-item">
+<h3>Access</h3>
+<p>近鉄八木西口駅 徒歩10分<br>駐車場完備</p>
+</div>
+<div class="access-item">
+<h3>Hours</h3>
+<p>10:00 - 16:00<br>最終受付 14:45</p>
+</div>
+<div class="access-item">
+<h3>Closed</h3>
+<p>日曜・祝日・土曜（土曜相談可）<br>平日不定休</p>
+</div>
+<div class="access-item">
+<h3>Payment</h3>
+<p>現金のみ</p>
+</div>
+<div class="access-item">
+<h3>Phone</h3>
+<p>090-9542-2003<br>ご予約・お問い合わせ</p>
+</div>
+<div class="access-item">
+<h3>Instagram</h3>
+<p><a href="https://www.instagram.com/marussalon" target="_blank" style="color:#d4a574;text-decoration:none">@marussalon</a></p>
+</div>
+</div>
+<div style="text-align:center;margin-top:60px">
+<a href="https://beauty.hotpepper.jp/slnH000722331/" class="cta-button" target="_blank">今すぐ予約</a>
+</div>
+</div>
+</section>
+<footer>
+<div class="footer-content">
+<div class="logo" style="color: rgba(255, 255, 255, 0.8);">maru's salon</div>
+<p style="margin-top:20px;font-size:14px">〒634-0821 奈良県橿原市四条町627-5 ぷれも薬局1Fカフェ内</p>
+<div class="footer-links">
+<a href="https://beauty.hotpepper.jp/slnH000722331/" target="_blank">HOT PEPPER BEAUTY</a>
+<a href="https://www.instagram.com/marussalon" target="_blank">INSTAGRAM</a>
+</div>
+<div class="footer-bottom">© 2026 maru's salon All Rights Reserved. &nbsp;| &nbsp;&nbsp;Powered by &nbsp;<a id="credit" href="https://uzuuzu.shop" target="_blank" style="color:#2c3e50; text-decoration:none;"><span style="background-color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: normal;">うずうず本舗</span></a>
+</div>
+</div>
+</footer>
+<script>
+const obs=new IntersectionObserver(e=>{e.forEach(i=>{if(i.isIntersecting)i.target.classList.add('is-visible')})},{threshold:0.1});
+document.querySelectorAll('.fade-in-section').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
