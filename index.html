@@ -3,131 +3,364 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>マルズサロンのホームページ</title>
-  <meta name="description" content="マルズサロンのホームページ。いい感じのカット、します。" />
+  <title>maru's salon | PRIVATE BEAUTY SALON</title>
+  <meta name="description" content="完全貸切のプライベート美容室 maru's salon。髪質改善・オーガニックカラー・ヘッドスパ・フェイシャルエステ。" />
 
   <style>
     :root{
-      --max: 720px;
-      --pad: 20px;
-      --text: #111;
-      --muted: #666;
-      --line: #ddd;
-      --bg: #fff;
+      --bg:#ffffff;
+      --text:#111;
+      --muted:#666;
+      --line:#e8e6e1;
+      --card:#faf9f6;
+      --accent:#111;
+      --btn:#111;
+      --btnText:#fff;
+      --shadow: 0 12px 30px rgba(0,0,0,.06);
+      --radius: 18px;
+      --max: 1040px;
     }
-
-    *{ box-sizing: border-box; }
-
-    html, body{
-      margin: 0;
-      padding: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN",
-                   "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
-      line-height: 1.7;
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic","Meiryo", sans-serif; line-height:1.75}
+    a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+    img{max-width:100%;height:auto;display:block}
+    .wrap{max-width:var(--max);margin:0 auto;padding:28px 18px 60px}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+    .brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+    .logo{
+      width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#f3efe6,#ffffff);
+      border:1px solid var(--line); display:grid; place-items:center; font-weight:700; letter-spacing:.02em;
     }
-
-    main{
-      max-width: var(--max);
-      margin: 0 auto;
-      padding: 28px var(--pad) 40px;
+    .brandname{font-weight:700;letter-spacing:.04em}
+    .navlinks{display:flex;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+    .navlinks a{color:var(--muted);text-decoration:none}
+    .navlinks a:hover{color:var(--text);text-decoration:underline}
+    .hero{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:26px 18px;
+      background: radial-gradient(1200px 600px at 20% 0%, #f5f2ea 0%, #ffffff 55%);
+      box-shadow: var(--shadow);
     }
-
-    .note{
-      color: var(--muted);
-      margin: 0 0 14px;
-      font-size: 14px;
+    .hero-inner{display:grid;grid-template-columns: 1.1fr .9fr;gap:18px;align-items:center}
+    .kicker{font-size:12px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin:0 0 8px}
+    h1{font-size:28px;line-height:1.25;margin:0 0 10px}
+    .sub{margin:0 0 14px;color:var(--muted)}
+    .rating{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 18px}
+    .stars{letter-spacing:.12em}
+    .score{color:var(--muted);font-size:14px}
+    .cta-row{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:12px 16px;border-radius:999px;border:1px solid var(--btn);
+      background:var(--btn);color:var(--btnText);text-decoration:none;font-weight:700;
+      min-height:44px;
     }
-
-    h1{
-      margin: 8px 0 12px;
-      font-size: 22px;
-      line-height: 1.3;
+    .btn.secondary{
+      background:transparent;color:var(--text);border:1px solid var(--line);
     }
-
-    .lead{
-      margin: 0 0 18px;
-      font-size: 16px;
+    .hero-media{
+      border-radius: calc(var(--radius) - 6px);
+      border:1px solid var(--line);
+      background: #fff;
+      overflow:hidden;
+      min-height: 180px;
+      display:grid;
+      place-items:center;
+      color:var(--muted);
+      padding:14px;
     }
-
-    hr{
-      border: 0;
-      border-top: 1px solid var(--line);
-      margin: 18px 0;
+    .hero-media small{display:block;text-align:center;line-height:1.6}
+    section{margin-top:34px}
+    .section-head{margin-bottom:14px}
+    .section-head h2{margin:0;font-size:20px}
+    .section-head p{margin:6px 0 0;color:var(--muted)}
+    .grid-4{display:grid;grid-template-columns: repeat(4, 1fr);gap:12px}
+    .grid-3{display:grid;grid-template-columns: repeat(3, 1fr);gap:12px}
+    .card{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:var(--card);
+      padding:16px 14px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.04);
     }
-
-    a{
-      color: inherit;
-      text-decoration: underline;
-      text-underline-offset: 3px;
+    .card h3{margin:0 0 8px;font-size:15px}
+    .card p{margin:0;color:var(--muted);font-size:14px}
+    .menu-card{display:flex;flex-direction:column;gap:8px}
+    .price{margin-top:auto;font-weight:800}
+    .tag{
+      display:inline-block;
+      font-size:12px;
+      color:var(--muted);
+      border:1px solid var(--line);
+      background:#fff;
+      padding:4px 10px;
+      border-radius:999px;
+      width:fit-content;
     }
-
-    .tel{
-      font-weight: 700;
-      letter-spacing: 0.02em;
+    .voice p{margin:0;color:var(--text)}
+    .voice .who{margin-top:10px;color:var(--muted);font-size:13px}
+    .access{
+      display:grid;grid-template-columns: 1fr 1fr;gap:12px;
     }
+    .kv{display:flex;gap:10px}
+    .k{min-width:92px;color:var(--muted)}
+    .v{flex:1}
+    .footer{
+      margin-top:44px;
+      padding-top:18px;
+      border-top:1px solid var(--line);
+      color:var(--muted);
+      font-size:14px;
+    }
+    .footer-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .footer strong{color:var(--text)}
+    .footer-links{display:flex;gap:14px;flex-wrap:wrap}
+    .footer-links a{color:var(--muted);text-decoration:none}
+    .footer-links a:hover{text-decoration:underline;color:var(--text)}
+    .copyright{margin-top:12px}
 
-    footer{
-      margin-top: 26px;
-      color: var(--muted);
-      font-size: 14px;
+    @media (max-width: 900px){
+      .hero-inner{grid-template-columns: 1fr}
+      .hero-media{min-height: 150px}
+      .grid-4{grid-template-columns: repeat(2, 1fr)}
+      .grid-3{grid-template-columns: 1fr}
+      .access{grid-template-columns: 1fr}
+      h1{font-size:26px}
+    }
+    @media (max-width: 480px){
+      .grid-4{grid-template-columns: 1fr}
+      .navlinks{display:none}
     }
   </style>
 </head>
+
 <body>
-
-  <main>
-    <p class="note">ここにオーナーの「映え写真」を1枚貼るだけ！</p>
-
-    <!-- 映え写真を置く場合は下を有効化 -->
-    <!--
-    <img
-      src="./images/hero.jpg"
-      alt="maru's salon オーナー写真"
-      style="max-width:100%;height:auto;margin-bottom:16px;"
-    />
-    -->
-
-    <h1>マルズサロンのホームページへようこそ</h1>
-
-    <p class="lead">いい感じのカット、します。</p>
-
-    <hr />
-
-    <p>
-      場所 橿原市（
-      <a href="https://maps.app.goo.gl/ucRXxNyus9BoLNGA7" target="_blank" rel="noopener">
-        Googleマップ
+  <div class="wrap">
+    <header class="nav">
+      <a class="brand" href="#top">
+        <!-- ロゴ画像がある場合：下のdiv.logoをimgに差し替え -->
+        <!-- <img src="./logo.png" alt="maru's salon logo" style="width:44px;height:44px;border-radius:12px;border:1px solid var(--line);" /> -->
+        <div class="logo" aria-hidden="true">m</div>
+        <div class="brandname">maru's salon</div>
       </a>
-      見て）
-    </p>
 
-    <p class="tel">09095422003</p>
+      <nav class="navlinks" aria-label="ページ内リンク">
+        <a href="#philosophy">Philosophy</a>
+        <a href="#menu">Menu</a>
+        <a href="#voice">Voice</a>
+        <a href="#access">Access</a>
+      </nav>
+    </header>
 
-    <p>
-      とりあえず
-      <a href="https://www.instagram.com/marussalon/" target="_blank" rel="noopener">
-        インスタ
-      </a>
-      見て
-    </p>
+    <main id="top">
+      <section class="hero" aria-label="Hero">
+        <div class="hero-inner">
+          <div>
+            <p class="kicker">PRIVATE BEAUTY SALON</p>
+            <h1>maru's salon</h1>
+            <p class="sub">完全貸切のプライベート空間で、あなただけの“特別な時間”を。</p>
 
-    <p>
-      <a href="https://beauty.hotpepper.jp/slnH000722331/" target="_blank" rel="noopener">
-        ホットペッパービューティー
-      </a>
-      で予約出来るよ
-    </p>
+            <div class="rating" aria-label="レビュー評価">
+              <div class="stars" aria-hidden="true">★★★★★</div>
+              <div class="score">4.93 / 161 Reviews</div>
+            </div>
 
-    <footer>
-      Powered by
-      <a href="https://uzuuzu.shop/" target="_blank" rel="noopener">
-        うずうず本舗
-      </a>
-      (v0.1 Alpha)
-    </footer>
-  </main>
+            <div class="cta-row">
+              <a class="btn" href="https://beauty.hotpepper.jp/slnH000722331/" target="_blank" rel="noopener noreferrer">今すぐ予約</a>
+              <a class="btn secondary" href="https://www.instagram.com/marussalon/" target="_blank" rel="noopener noreferrer">Instagram</a>
+            </div>
+          </div>
 
+          <div class="hero-media" aria-label="メイン画像">
+            <!-- 画像を置く場合：下のコメントアウトを外して差し替え -->
+            <!-- <img src="./hero.jpg" alt="maru's salon 店内イメージ" /> -->
+            <small>
+              ここにメイン画像（hero.jpg など）を<br />
+              1枚置くと、一気に“それっぽく”なります
+            </small>
+          </div>
+        </div>
+      </section>
+
+      <section id="philosophy" aria-label="Our Philosophy">
+        <div class="section-head">
+          <h2>Our Philosophy</h2>
+          <p>頑張るあなたのための、特別な時間</p>
+        </div>
+
+        <div class="grid-4">
+          <div class="card">
+            <h3>完全貸切空間</h3>
+            <p>プライベートな空間で、周りを気にせずゆったりとお過ごしいただけます。</p>
+          </div>
+          <div class="card">
+            <h3>キッズスペース完備</h3>
+            <p>2児の母であるオーナーが運営。お子様連れでも安心してご来店いただけます。</p>
+          </div>
+          <div class="card">
+            <h3>オーガニック志向</h3>
+            <p>地肌に優しいオーガニックカラー、ヘナなど厳選した薬剤を使用。</p>
+          </div>
+          <div class="card">
+            <h3>髪質改善のプロ</h3>
+            <p>アジュバン正規取扱店。独自のメソッドで理想の艶髪を実現。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="menu" aria-label="Menu">
+        <div class="section-head">
+          <h2>Menu</h2>
+          <p>厳選されたメニューで、あなたの美しさを引き出します</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="card menu-card">
+            <span class="tag">Hair</span>
+            <h3>似合わせカット + カラー</h3>
+            <p>あなたにぴったりのスタイルをご提案</p>
+            <div class="price">¥8,000〜</div>
+          </div>
+
+          <div class="card menu-card">
+            <span class="tag">Hair</span>
+            <h3>カット + カラー + トリートメント</h3>
+            <p>艶髪を実現する3STEPトリートメント</p>
+            <div class="price">¥10,100〜</div>
+          </div>
+
+          <div class="card menu-card">
+            <span class="tag">Care</span>
+            <h3>髪質改善ストレート</h3>
+            <p>ダメージや癖毛でお悩みの方に</p>
+            <div class="price">¥14,300</div>
+          </div>
+
+          <div class="card menu-card">
+            <span class="tag">Relax</span>
+            <h3>極上ヘッドスパ</h3>
+            <p>頭皮ケアとマッサージで至福のひととき</p>
+            <div class="price">¥3,500〜</div>
+          </div>
+
+          <div class="card menu-card">
+            <span class="tag">Color</span>
+            <h3>オーガニックカラー・ヘナ</h3>
+            <p>カラー剤にお悩みの方へ</p>
+            <div class="price">¥7,000〜</div>
+          </div>
+
+          <div class="card menu-card">
+            <span class="tag">Esthe</span>
+            <h3>フェイシャルエステ</h3>
+            <p>アジュバン製品で美しい艶肌に</p>
+            <div class="price">お問い合わせ</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="voice" aria-label="Voice">
+        <div class="section-head">
+          <h2>Voice</h2>
+          <p>お客様からいただいた声</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="card voice">
+            <p>「髪の毛が広がりやすく、縮毛矯正を勧められ続けていましたが、カットとクレンジングスパで髪が収まって驚きました。趣味や仕事の悩みなど色々お話でき、とても居心地良く過ごせました。」</p>
+            <div class="who">— アユミン様（20代後半）</div>
+          </div>
+
+          <div class="card voice">
+            <p>「完全貸切なので周りの目も気にならず、リラックスして施術を受けられます。2児の母であるオーナーさんに日頃の悩みを打ち明けつつ癒しも得られる最高のサロンです。」</p>
+            <div class="who">— 常連のお客様</div>
+          </div>
+
+          <div class="card">
+            <h3>maru's salonについて</h3>
+            <p style="margin-top:8px;">
+              完全貸切のプライベート空間で、あなたに寄り添う提案を大切にしています。<br/>
+              「落ち着ける」「相談しやすい」そう感じていただける時間づくりを。<br/>
+              髪も心も整う、日常の“ご褒美”としてお越しください。
+            </p>
+            <p style="margin:12px 0 0;color:var(--muted);font-size:13px;">オーナースタイリスト ナガモリマサヨ</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="access" aria-label="Access">
+        <div class="section-head">
+          <h2>Access</h2>
+        </div>
+
+        <div class="access">
+          <div class="card">
+            <div class="kv">
+              <div class="k">Address</div>
+              <div class="v">奈良県橿原市四条町627-5<br/>ぷれも薬局1Fカフェ内</div>
+            </div>
+            <div class="kv" style="margin-top:10px;">
+              <div class="k">Access</div>
+              <div class="v">近鉄八木西口駅 徒歩10分<br/>駐車場完備</div>
+            </div>
+            <div class="kv" style="margin-top:10px;">
+              <div class="k">Hours</div>
+              <div class="v">10:00 - 16:00<br/>最終受付 14:45</div>
+            </div>
+            <div class="kv" style="margin-top:10px;">
+              <div class="k">Closed</div>
+              <div class="v">日曜・祝日・土曜（土曜相談可）<br/>平日不定休</div>
+            </div>
+            <div class="kv" style="margin-top:10px;">
+              <div class="k">Payment</div>
+              <div class="v">現金のみ</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="kv">
+              <div class="k">Instagram</div>
+              <div class="v">
+                <a href="https://www.instagram.com/marussalon/" target="_blank" rel="noopener noreferrer">@marussalon</a>
+              </div>
+            </div>
+
+            <div class="kv" style="margin-top:10px;">
+              <div class="k">Map</div>
+              <div class="v">
+                <a href="https://maps.app.goo.gl/ucRXxNyus9BoLNGA7" target="_blank" rel="noopener noreferrer">Googleマップで見る</a>
+              </div>
+            </div>
+
+            <div style="margin-top:16px;">
+              <a class="btn" href="https://beauty.hotpepper.jp/slnH000722331/" target="_blank" rel="noopener noreferrer" style="width:100%;">今すぐ予約</a>
+              <a class="btn secondary" href="https://www.instagram.com/marussalon/" target="_blank" rel="noopener noreferrer" style="width:100%;margin-top:10px;">Instagramを見る</a>
+            </div>
+
+            <p style="margin:12px 0 0;color:var(--muted);font-size:13px;">
+              ※ご予約・メニュー詳細はHotPepperまたはInstagramからご確認ください。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer" aria-label="Footer">
+        <div class="footer-top">
+          <div>
+            <strong>maru's salon</strong><br/>
+            〒634-0821 奈良県橿原市四条町627-5 ぷれも薬局1Fカフェ内
+          </div>
+
+          <div class="footer-links">
+            <a href="https://beauty.hotpepper.jp/slnH000722331/" target="_blank" rel="noopener noreferrer">HOT PEPPER BEAUTY</a>
+            <a href="https://www.instagram.com/marussalon/" target="_blank" rel="noopener noreferrer">INSTAGRAM</a>
+          </div>
+        </div>
+
+        <div class="copyright">© 2024 maru's salon. All Rights Reserved.</div>
+      </footer>
+    </main>
+  </div>
 </body>
 </html>
